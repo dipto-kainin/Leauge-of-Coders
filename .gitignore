@@ -1,41 +1,191 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ─────────────────────────────────────────────────────────────────────────────
+# Team Coding Death Match – .gitignore
+# Monorepo: Go backend (backend/) + future frontend (frontend/)
+# ─────────────────────────────────────────────────────────────────────────────
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-/coverage
+# ── Secrets & environment files ───────────────────────────────────────────────
+# Never commit real credentials, JWT secrets, or DB passwords.
+.env
+**/.env
+*.env
+!*.env.example
+!*.env.template
 
-# next.js
-/.next/
-/out/
+# Project-specific env files
+backend/config/dev.env
+backend/config/*.env
+backend/config/prod.env
+backend/config/staging.env
 
-# production
-/build
 
-# misc
+# ── Go build artifacts ────────────────────────────────────────────────────────
+# Compiled binaries
+backend/bin/
+backend/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Go test output & coverage
+*.out
+coverage.html
+coverage.txt
+/tmp/
+
+# Go module download cache (should not be committed)
+# go.sum IS committed intentionally – do not ignore it
+
+
+# ── Air / live-reload ─────────────────────────────────────────────────────────
+# https://github.com/cosmtrek/air
+backend/tmp/
+.air.toml
+
+
+# ── frontend (Node / Next.js / Vite / React) ──────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.nuxt/
+frontend/.output/
+frontend/.cache/
+frontend/.turbo/
+frontend/.vercel/
+frontend/.netlify/
+frontend/storybook-static/
+
+# Package manager lock files – keep ONE (whichever your team uses)
+# Uncomment the one you do NOT use to ignore it:
+# frontend/package-lock.json
+# frontend/yarn.lock
+# frontend/pnpm-lock.yaml
+
+# Env files inside frontend
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+
+# ── IDE / editor ──────────────────────────────────────────────────────────────
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# JetBrains (GoLand, WebStorm, IntelliJ …)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim / Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Zed
+.zed/
+
+
+# ── OS-generated files ────────────────────────────────────────────────────────
+
+# macOS
 .DS_Store
-*.pem
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# Linux
+.directory
+.Trash-*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# vercel
-.vercel
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# ── Docker ────────────────────────────────────────────────────────────────────
+# Local override compose files that may contain secrets
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Docker volumes mounted locally (postgres data, redis data, etc.)
+.docker/
+docker/data/
+postgres-data/
+redis-data/
+
+
+# ── Database ──────────────────────────────────────────────────────────────────
+# Local PostgreSQL data directory if running bare-metal
+pgdata/
+*.pgsql
+*.sql.bak
+
+# SQLite (if used in tests)
+*.sqlite
+*.sqlite3
+*.db
+
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+backend/logs/
+frontend/logs/
+
+
+# ── Profiling & debug ─────────────────────────────────────────────────────────
+# Go pprof output
+*.pprof
+cpu.prof
+mem.prof
+
+# Delve debugger
+__debug_bin
+__debug_bin*
+
+
+# ── Test & tooling output ─────────────────────────────────────────────────────
+# Testify / gotestsum reports
+test-results/
+junit.xml
+
+# golangci-lint cache
+.golangci-lint-cache/
+.golangci.yml.cache
+
+# mockery generated mocks (if auto-generated; remove if you commit mocks)
+# mocks/
+
+
+# ── Miscellaneous ─────────────────────────────────────────────────────────────
+# Compiled proto files (if generated; remove if you commit them)
+# *.pb.go
+
+# Vendor directory (remove if you use `go mod vendor`)
+# vendor/
