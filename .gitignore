@@ -18,7 +18,6 @@ backend/config/*.env
 backend/config/prod.env
 backend/config/staging.env
 
-frontend/package-lock.json
 
 
 # ── Go build artifacts ────────────────────────────────────────────────────────
@@ -63,10 +62,11 @@ frontend/.turbo/
 frontend/.vercel/
 frontend/.netlify/
 frontend/storybook-static/
+frontend/DESIGN.md
 
 # Package manager lock files – keep ONE (whichever your team uses)
 # Uncomment the one you do NOT use to ignore it:
-# frontend/package-lock.json
+frontend/package-lock.json
 # frontend/yarn.lock
 # frontend/pnpm-lock.yaml
 
