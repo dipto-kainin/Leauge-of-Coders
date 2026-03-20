@@ -18,6 +18,8 @@ backend/config/*.env
 backend/config/prod.env
 backend/config/staging.env
 
+frontend/package-lock.json
+
 
 # ── Go build artifacts ────────────────────────────────────────────────────────
 # Compiled binaries
