@@ -50,32 +50,32 @@ backend/tmp/
 
 
 # ── frontend (Node / Next.js / Vite / React) ──────────────────────────────────
-*/node_modules/
-*/.next/
-*/out/
-*/dist/
-*/build/
-*/.nuxt/
-*/.output/
-*/.cache/
-*/.turbo/
-*/.vercel/
-*/.netlify/
-*/storybook-static/
-*/DESIGN.md
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.nuxt/
+frontend/.output/
+frontend/.cache/
+frontend/.turbo/
+frontend/.vercel/
+frontend/.netlify/
+frontend/storybook-static/
+frontend/DESIGN.md
 
 # Package manager lock files – keep ONE (whichever your team uses)
 # Uncomment the one you do NOT use to ignore it:
-*/package-lock.json
+frontend/package-lock.json
 # frontend/yarn.lock
 # frontend/pnpm-lock.yaml
 
 # Env files inside frontend
-*/.env
-*/.env.local
-*/.env.development.local
-*/.env.test.local
-*/.env.production.local
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
 
 
 # ── IDE / editor ──────────────────────────────────────────────────────────────
