@@ -32,15 +32,20 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		if originAllowed {
 			c.Header("Access-Control-Allow-Origin", requestOrigin)
+			c.Header("Access-Control-Allow-Credentials", "true")
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+			c.Header("Access-Control-Max-Age", "86400") // cache preflight for 24h
 		}
 
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
-
 		// Handle pre-flight requests immediately.
+		// Must be AFTER setting headers — otherwise browser gets 204 with no ACAO header.
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+			if originAllowed {
+				c.AbortWithStatus(204)
+			} else {
+				c.AbortWithStatus(403)
+			}
 			return
 		}
 

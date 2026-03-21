@@ -11,6 +11,7 @@ import (
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/auth"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/middleware"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/models"
+	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/problems"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/routes"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/config"
 	"github.com/gin-gonic/gin"
@@ -47,7 +48,7 @@ func main() {
 	if choice == "y" || choice == "yes" {
 		fmt.Println("Auto-migrating models...")
 
-		if err := db.AutoMigrate(&models.User{}); err != nil {
+		if err := db.AutoMigrate(&models.User{}, &models.Problem{}, &models.TestCase{}); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -61,21 +62,28 @@ func main() {
 	authService := auth.NewService(authRepo)
 	authHandler := auth.NewAuthHandler(authService)
 
+	// Build problem dependencies
+	problemRepo := problems.NewProblemRepository(db)
+	problemService := problems.NewProblemService(problemRepo, authRepo)
+	problemHandler := problems.NewProblemHandler(problemService)
+
 	// Create Gin app
 	app := gin.Default()
 
 	app.Use(middleware.CORSMiddleware())
 
-	// JWT bearer middleware for protected endpoints
+	// Middleware
 	authMiddleware := middleware.AuthMiddleware()
+	adminMw := middleware.AdminMiddleware()
 
 	// Optional health check
 	app.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	// Register auth routes
+	// Register routes
 	routes.RegisterAuthRoutes(app, authMiddleware, authHandler)
+	routes.RegisterProblemRoutes(app, authMiddleware, adminMw, problemHandler)
 
 	// Get port from environment variable, default to 8080 if not set
 	port := os.Getenv("PORT")

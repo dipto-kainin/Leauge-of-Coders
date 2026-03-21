@@ -20,7 +20,7 @@ type AuthState = {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true, // start true so guards wait for fetchMe() before redirecting
 
   register: async (payload) => {
     set({ isLoading: true });
@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+      window.location.href = "/";
     } catch (error) {
       set({
         user: null,
@@ -54,6 +55,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+      window.location.href = "/";
     } catch (error) {
       set({
         user: null,
