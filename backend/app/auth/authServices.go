@@ -1,23 +1,29 @@
 package auth
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"time"
 
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/lib"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/models"
+	"github.com/dipto-kainin/Leauge-of-Coders/backend/config"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/oauth2"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrInvalidCredentials  = errors.New("invalid email or password")
-	ErrEmailAlreadyUsed    = errors.New("email is already in use")
-	ErrUsernameAlreadyUsed = errors.New("username is already in use")
-	ErrInvalidToken        = errors.New("invalid or expired token")
+	ErrInvalidCredentials = errors.New("invalid email or password")
+	ErrEmailAlreadyUsed   = errors.New("email is already in use")
+	ErrInvalidToken       = errors.New("invalid or expired token")
 )
 
 type Service struct {
@@ -72,14 +78,6 @@ func (s *Service) Register(input RegisterRequest) (*AuthResponse, error) {
 	}
 	if existingEmail != nil {
 		return nil, ErrEmailAlreadyUsed
-	}
-
-	existingUsername, err := s.repo.GetUserByUsername(input.Username)
-	if err != nil {
-		return nil, fmt.Errorf("failed checking username uniqueness: %w", err)
-	}
-	if existingUsername != nil {
-		return nil, ErrUsernameAlreadyUsed
 	}
 
 	// rest of the function stays the same...
@@ -144,6 +142,66 @@ func (s *Service) Me(userID uuid.UUID) (*MeResponse, error) {
 			Method:   user.Method,
 		},
 	}, nil
+}
+
+func (s *Service) GoogleAuthURL() (url string, state string, err error) {
+	b := make([]byte, 16)
+	if _, err = rand.Read(b); err != nil {
+		return
+	}
+	state = base64.URLEncoding.EncodeToString(b)
+	url = config.GoogleOAuthConfig().AuthCodeURL(state, oauth2.AccessTypeOffline)
+	return
+}
+
+type googleUserInfo struct {
+	Sub   string `json:"sub"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
+func (s *Service) GoogleRegister(code string) (*AuthResponse, error) {
+	cfg := config.GoogleOAuthConfig()
+	token, err := cfg.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, fmt.Errorf("failed exchanging code: %w", err)
+	}
+	client := cfg.Client(context.Background(), token)
+	resp, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+	if err != nil {
+		return nil, fmt.Errorf("failed fetching user info: %w", err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	var info googleUserInfo
+	if err := json.Unmarshal(body, &info); err != nil {
+		return nil, fmt.Errorf("failed parsing user info: %w", err)
+	}
+	user, err := s.repo.GetUserByGoogleSub(info.Sub)
+	if err != nil {
+		return nil, fmt.Errorf("failed looking up user: %w", err)
+	}
+	if user == nil {
+		existing, err := s.repo.GetUserByEmail(info.Email)
+		if err != nil {
+			return nil, fmt.Errorf("failed checking email: %w", err)
+		}
+		if existing != nil {
+			return nil, errors.New("email already registered with a password account")
+		}
+
+		user = &models.User{
+			Username:  info.Name,
+			Email:     info.Email,
+			GoogleSub: &info.Sub,
+			Role:      models.RoleUser,
+			Method:    models.MethodGoogle,
+		}
+		if err := s.repo.CreateUser(user); err != nil {
+			return nil, fmt.Errorf("failed creating user: %w", err)
+		}
+	}
+	return s.issueToken(user)
 }
 
 func (s *Service) ParseAccessToken(tokenString string) (*AuthClaims, error) {

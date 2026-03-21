@@ -12,6 +12,8 @@ type AuthService interface {
 	Register(input RegisterRequest) (*AuthResponse, error)
 	Login(input LoginRequest) (*AuthResponse, error)
 	Me(userID uuid.UUID) (*MeResponse, error)
+	GoogleAuthURL() (string, string, error)
+	GoogleRegister(code string) (*AuthResponse, error)
 }
 
 type AuthHandler struct {
@@ -55,6 +57,10 @@ type UserDTO struct {
 
 type errorResponse struct {
 	Message string `json:"message"`
+}
+
+type queryParams struct {
+	Type string `form:"type"`
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -116,4 +122,45 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, resp)
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	c.SetCookie("token", "", -1, "/", "", false, true)
+	c.JSON(http.StatusOK, gin.H{"message": "logged out"})
+}
+
+func (h *AuthHandler) GoogleLogin(c *gin.Context) {
+	url, state, err := h.service.GoogleAuthURL()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorResponse{Message: "failed generating auth URL"})
+		return
+	}
+	// Store state in a short-lived HttpOnly cookie to validate on callback
+	c.SetCookie("oauth_state", state, 600, "/", "", false, true)
+	c.JSON(http.StatusOK, gin.H{"url": url})
+}
+
+func (h *AuthHandler) GoogleCallback(c *gin.Context) {
+	// Validate state to prevent CSRF
+	storedState, err := c.Cookie("oauth_state")
+	if err != nil || storedState != c.Query("state") {
+		c.JSON(http.StatusBadRequest, errorResponse{Message: "invalid state"})
+		return
+	}
+	c.SetCookie("oauth_state", "", -1, "/", "", false, true) // clear it
+
+	code := c.Query("code")
+	if code == "" {
+		c.JSON(http.StatusBadRequest, errorResponse{Message: "missing code"})
+		return
+	}
+
+	resp, err := h.service.GoogleRegister(code)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse{Message: err.Error()})
+		return
+	}
+
+	c.SetCookie("token", resp.Token, 3600*24, "/", "", false, true)
+	c.Redirect(http.StatusFound, "http://localhost:3000/")
 }

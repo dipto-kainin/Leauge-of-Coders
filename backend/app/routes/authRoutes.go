@@ -12,5 +12,9 @@ func RegisterAuthRoutes(router *gin.Engine, authMiddleware gin.HandlerFunc, hand
 		authGroup.POST("/register", handler.Register)
 		authGroup.POST("/login", handler.Login)
 		authGroup.GET("/me", authMiddleware, handler.Me)
+		authGroup.POST("/logout", authMiddleware, handler.Logout)
+
+		authGroup.GET("/google/login", handler.GoogleLogin)
+		authGroup.GET("/google/callback", handler.GoogleCallback)
 	}
 }

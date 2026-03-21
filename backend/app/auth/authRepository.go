@@ -11,9 +11,9 @@ import (
 type AuthRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByEmail(email string) (*models.User, error)
-	GetUserByUsername(username string) (*models.User, error)
 	GetUserByID(id string) (*models.User, error)
 	ExistsByEmail(email string) (bool, error)
+	GetUserByGoogleSub(sub string) (*models.User, error)
 }
 
 type authRepository struct {
@@ -40,24 +40,6 @@ func (r *authRepository) GetUserByEmail(email string) (*models.User, error) {
 	}
 
 	// Extra safety: if rows affected is 0, user genuinely doesn't exist
-	if result.RowsAffected == 0 {
-		return nil, nil
-	}
-
-	return &user, nil
-}
-
-func (r *authRepository) GetUserByUsername(username string) (*models.User, error) {
-	var user models.User
-	result := r.db.Where("LOWER(username) = ?", strings.ToLower(strings.TrimSpace(username))).First(&user)
-
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, result.Error
-	}
-
 	if result.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -92,4 +74,16 @@ func (r *authRepository) ExistsByEmail(email string) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (r *authRepository) GetUserByGoogleSub(sub string) (*models.User, error) {
+	var user models.User
+	result := r.db.Where("google_sub = ?", sub).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return &user, nil
 }

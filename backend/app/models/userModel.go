@@ -23,11 +23,12 @@ type User struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	Username     string `gorm:"unique;not null"`
-	PasswordHash string `gorm:"not null"`
-	Email        string `gorm:"unique;not null"`
-	Role         string `gorm:"type:varchar(20);not null;default:'user';check:role IN ('user','admin')" json:"role"`
-	Method       string `gorm:"type:varchar(20);not null;default:'local';check:method IN ('local','google')"`
+	Username     string  `gorm:"not null"`
+	PasswordHash string  `gorm:"default:null"` // ← remove not null
+	Email        string  `gorm:"unique;not null"`
+	Role         string  `gorm:"type:varchar(20);not null;default:'user';check:role IN ('user','admin')" json:"role"`
+	Method       string  `gorm:"type:varchar(20);not null;default:'local';check:method IN ('local','google')"`
+	GoogleSub    *string `gorm:"uniqueIndex;default:null"` // ← new
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
