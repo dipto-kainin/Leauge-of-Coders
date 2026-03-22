@@ -1,6 +1,7 @@
 import { apiFetch } from "@/service/api";
 
 export interface TestCaseRequest {
+  id?: string;
   input: string;
   output: string;
   points: number;
@@ -18,6 +19,8 @@ export interface CreateProblemRequest {
   moderator_emails: string[];
   test_cases: TestCaseRequest[];
 }
+
+export type UpdateProblemRequest = CreateProblemRequest;
 
 export interface UserDTO {
   id: string;
@@ -46,6 +49,14 @@ export const problemService = {
   createProblem: async (payload: CreateProblemRequest): Promise<void> => {
     return apiFetch<void>("/api/problems", {
       method: "POST",
+      body: JSON.stringify(payload),
+      credentials: "include",
+    });
+  },
+
+  updateProblem: async (id: string, payload: UpdateProblemRequest): Promise<void> => {
+    return apiFetch<void>(`/api/problems/${id}`, {
+      method: "PUT",
       body: JSON.stringify(payload),
       credentials: "include",
     });

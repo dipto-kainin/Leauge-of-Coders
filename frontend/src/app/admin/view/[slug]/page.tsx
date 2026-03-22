@@ -83,9 +83,11 @@ export default function AdminSingleProblemPage() {
               <span className="text-zinc-500 font-mono text-sm">/{problem.slug}</span>
             </div>
           </div>
-          <Button disabled className="bg-primary/50 text-white/50 cursor-not-allowed font-bold px-8 shadow-[0_0_15px_rgba(124,106,247,0.1)]">
-            Edit Challenge (Coming Soon)
-          </Button>
+          <Link href={`/admin/view/${problem.slug}/edit`}>
+            <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-8 shadow-[0_0_15px_rgba(124,106,247,0.3)] transition-all">
+              Edit Challenge
+            </Button>
+          </Link>
         </div>
       </div>
 

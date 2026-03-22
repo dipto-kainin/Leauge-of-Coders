@@ -28,6 +28,26 @@ type TestCaseRequest struct {
 	IsExample bool   `json:"is_example"`
 }
 
+type UpdateProblemRequest struct {
+	Name             string           `json:"name" binding:"required"`
+	Difficulty       string           `json:"difficulty" binding:"required"`
+	Description      string           `json:"description" binding:"required"`
+	ProblemStatement string           `json:"problem_statement" binding:"required"`
+	InputFormat      string           `json:"input_format" binding:"required"`
+	OutputFormat     string           `json:"output_format" binding:"required"`
+	Constraints      string           `json:"constraints"`
+	ModeratorEmails  []string         `json:"moderator_emails"`
+	TestCases        []UpdateTestCase `json:"test_cases"`
+}
+
+type UpdateTestCase struct {
+	ID        uuid.UUID `json:"id" binding:"omitempty"`
+	Input     string    `json:"input" binding:"required"`
+	Output    string    `json:"output" binding:"required"`
+	Points    int       `json:"points" binding:"required"`
+	IsExample bool      `json:"is_example" binding:"required"`
+}
+
 type errorResponse struct {
 	Message string `json:"message"`
 }
@@ -95,6 +115,28 @@ func (h *ProblemHandler) GetProblemBySlug(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"problem": problem})
+}
+
+func (h *ProblemHandler) UpdateProblem(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse{Message: "invalid problem ID"})
+		return
+	}
+
+	var req UpdateProblemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse{Message: "invalid request body: " + err.Error()})
+		return
+	}
+
+	if err := h.service.UpdateProblem(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, errorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "problem updated"})
 }
 
 func (h *ProblemHandler) DeleteProblem(c *gin.Context) {

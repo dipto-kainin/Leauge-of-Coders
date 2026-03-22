@@ -17,6 +17,11 @@ type ProblemRepository interface {
 	GetAllProblems(page string, limit string) ([]models.Problem, error)
 	ReplaceTestCases(problemID uuid.UUID, testCases []models.TestCase) error
 	ReplaceModerators(problem *models.Problem, moderators []models.User) error
+	// UpsertTestCases upserts a set of test cases for a problem.
+	// - If tc.ID is set, update that row.
+	// - Otherwise, find an existing row with the same (problem_id, input, output) and update it,
+	//   or insert a new row if none exists.
+	UpsertTestCases(problemID uuid.UUID, testCases []models.TestCase) error
 }
 
 type problemRepository struct {
@@ -99,4 +104,41 @@ func (r *problemRepository) ReplaceTestCases(problemID uuid.UUID, testCases []mo
 
 func (r *problemRepository) ReplaceModerators(problem *models.Problem, moderators []models.User) error {
 	return r.db.Model(problem).Association("Moderators").Replace(moderators)
+}
+
+func (r *problemRepository) UpsertTestCases(problemID uuid.UUID, testCases []models.TestCase) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		for i := range testCases {
+			tc := &testCases[i]
+			tc.ProblemID = problemID
+
+			if tc.ID != uuid.Nil {
+				// Update the existing row by primary key.
+				if err := tx.Save(tc).Error; err != nil {
+					return err
+				}
+				continue
+			}
+
+			// No ID provided – check for an existing row with the same input+output.
+			var existing models.TestCase
+			err := tx.Where("problem_id = ? AND input = ? AND output = ?",
+				problemID, tc.Input, tc.Output).First(&existing).Error
+			if err == nil {
+				// Duplicate found – update in place.
+				existing.Points = tc.Points
+				existing.IsExample = tc.IsExample
+				if err := tx.Save(&existing).Error; err != nil {
+					return err
+				}
+				continue
+			}
+
+			// Fresh test case – insert.
+			if err := tx.Create(tc).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

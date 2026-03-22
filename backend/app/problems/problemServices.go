@@ -28,6 +28,7 @@ type ProblemService interface {
 	CreateProblem(req CreateProblemRequest, creatorID uuid.UUID) (*models.Problem, error)
 	GetProblemBySlug(slug string) (*models.Problem, error)
 	GetAllProblems(page string, limit string) ([]models.Problem, error)
+	UpdateProblem(id uuid.UUID, req UpdateProblemRequest) error
 	DeleteProblem(id uuid.UUID) error
 }
 
@@ -160,6 +161,112 @@ func (s *problemService) GetProblemBySlug(slug string) (*models.Problem, error) 
 		return nil, fmt.Errorf("problem not found: %w", err)
 	}
 	return problem, nil
+}
+
+func (s *problemService) UpdateProblem(id uuid.UUID, req UpdateProblemRequest) error {
+	// --- Validation ---
+	if strings.TrimSpace(req.Name) == "" {
+		return ErrNameRequired
+	}
+	if strings.TrimSpace(req.Difficulty) == "" {
+		return ErrDifficultyRequired
+	}
+	validDifficulties := map[string]bool{"easy": true, "medium": true, "hard": true}
+	if !validDifficulties[strings.ToLower(req.Difficulty)] {
+		return ErrInvalidDifficulty
+	}
+	if strings.TrimSpace(req.ProblemStatement) == "" {
+		return ErrStatementRequired
+	}
+	if strings.TrimSpace(req.InputFormat) == "" {
+		return ErrInputFormatRequired
+	}
+	if strings.TrimSpace(req.OutputFormat) == "" {
+		return ErrOutputFormatRequired
+	}
+
+	// --- Validate test cases ---
+	// Enforce uniqueness on input+output within the request itself.
+	seen := make(map[string]bool)
+	hasExample := false
+	hasPrivate := false
+
+	for _, tc := range req.TestCases {
+		key := fmt.Sprintf("%s|||%s", tc.Input, tc.Output)
+		if seen[key] {
+			return ErrDuplicateTestCase
+		}
+		seen[key] = true
+
+		if tc.IsExample {
+			hasExample = true
+		} else {
+			hasPrivate = true
+		}
+	}
+	if len(req.TestCases) > 0 {
+		if !hasExample {
+			return ErrNeedExampleTestCase
+		}
+		if !hasPrivate {
+			return ErrNeedPrivateTestCase
+		}
+	}
+
+	// --- Fetch existing problem ---
+	problem, err := s.repo.GetProblemByID(id)
+	if err != nil {
+		return fmt.Errorf("problem not found: %w", err)
+	}
+
+	// --- Update scalar fields ---
+	problem.Name = strings.TrimSpace(req.Name)
+	problem.Slug = slugify(req.Name)
+	problem.Difficulty = strings.ToLower(req.Difficulty)
+	problem.Description = req.Description
+	problem.ProblemStatement = req.ProblemStatement
+	problem.InputFormat = req.InputFormat
+	problem.OutputFormat = req.OutputFormat
+	problem.Constraints = req.Constraints
+
+	if err := s.repo.UpdateProblem(problem); err != nil {
+		return fmt.Errorf("failed updating problem: %w", err)
+	}
+
+	// --- Resolve and replace moderators ---
+	var moderators []models.User
+	for _, email := range req.ModeratorEmails {
+		user, err := s.userRepo.GetUserByEmail(email)
+		if err != nil {
+			return fmt.Errorf("error looking up moderator %s: %w", email, err)
+		}
+		if user == nil {
+			return fmt.Errorf("%w: %s", ErrModeratorEmailNotFound, email)
+		}
+		moderators = append(moderators, *user)
+	}
+	if err := s.repo.ReplaceModerators(problem, moderators); err != nil {
+		return fmt.Errorf("failed updating moderators: %w", err)
+	}
+
+	// --- Upsert test cases ---
+	if len(req.TestCases) > 0 {
+		var testCases []models.TestCase
+		for _, tc := range req.TestCases {
+			testCases = append(testCases, models.TestCase{
+				ID:        tc.ID, // may be uuid.Nil for new cases
+				Input:     tc.Input,
+				Output:    tc.Output,
+				Points:    tc.Points,
+				IsExample: tc.IsExample,
+			})
+		}
+		if err := s.repo.UpsertTestCases(id, testCases); err != nil {
+			return fmt.Errorf("failed upserting test cases: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (s *problemService) DeleteProblem(id uuid.UUID) error {

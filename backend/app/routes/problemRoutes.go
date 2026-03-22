@@ -12,6 +12,7 @@ func RegisterProblemRoutes(router *gin.Engine, authMiddleware gin.HandlerFunc, a
 		// Admin-only routes
 		problemGroup.POST("", authMiddleware, adminMiddleware, handler.CreateProblem)
 		problemGroup.DELETE("/:id", authMiddleware, adminMiddleware, handler.DeleteProblem)
+		problemGroup.PUT("/:id", authMiddleware, adminMiddleware, handler.UpdateProblem)
 
 		// Authenticated routes
 		problemGroup.GET("", authMiddleware, handler.GetAllProblems)
