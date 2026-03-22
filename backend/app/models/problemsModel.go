@@ -18,6 +18,9 @@ type Problem struct {
 	OutputFormat     string    `json:"output_format" gorm:"type:text;not null"`
 	Constraints      string    `json:"constraints" gorm:"type:text"`
 
+	PointValue  int     `json:"point_value" gorm:"not null;default:100"`
+	SuccessRate float64 `json:"success_rate" gorm:"not null;default:0"`
+
 	// Relationships with correct cascading deletes
 	Moderators []User     `json:"moderators" gorm:"many2many:problem_moderators;constraint:OnDelete:CASCADE;"`
 	TestCases  []TestCase `json:"test_cases" gorm:"foreignKey:ProblemID;constraint:OnDelete:CASCADE;"`

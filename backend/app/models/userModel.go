@@ -30,6 +30,10 @@ type User struct {
 	Method       string  `gorm:"type:varchar(20);not null;default:'local';check:method IN ('local','google')"`
 	GoogleSub    *string `gorm:"uniqueIndex;default:null"` // ← new
 
+	MMR           int     `gorm:"not null;default:1000" json:"mmr"`
+	WinRate       float64 `gorm:"not null;default:0" json:"win_rate"`
+	MatchesPlayed int     `gorm:"not null;default:0" json:"matches_played"`
+
 	OwnedProblems []Problem `json:"owned_problems" gorm:"many2many:problem_moderators;"`
 }
 
