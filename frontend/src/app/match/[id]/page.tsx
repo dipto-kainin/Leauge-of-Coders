@@ -18,7 +18,9 @@ export default function MatchArenaPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { 
-      opponentTestsPassed, 
+      myPointsPassed,
+      opponentPointsPassed,
+      totalPoints,
       connectSocket, 
       disconnectSocket, 
       submitCode,
@@ -95,6 +97,11 @@ export default function MatchArenaPage() {
   const isMatchFinished2 = wsMatch?.status === "finished";
   const effectiveWinnerID = isMatchFinished2 ? wsMatch?.winner_id : winnerID;
 
+  // HP Math: Starts at 100%, drops by (Points / TotalPoints) * 100
+  const maxPoints = totalPoints || matchData?.problem?.point_value || 1;
+  const myHpPct = Math.max(0, 100 - ((opponentPointsPassed || 0) / maxPoints) * 100);
+  const opponentHpPct = Math.max(0, 100 - ((myPointsPassed || 0) / maxPoints) * 100);
+
   return (
     <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
       
@@ -138,17 +145,30 @@ export default function MatchArenaPage() {
                     {formatTime(timeRemaining)}
                 </div>
             </div>
-            <div className="flex items-center space-x-6">
-                 <div className="flex flex-col items-end">
-                     <span className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Opponent Progress</span>
-                     <div className="w-32 h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="flex flex-col items-center space-y-4 px-4 w-1/3">
+                 <div className="w-full flex flex-col items-start relative">
+                     <span className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Your HP</span>
+                     <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5 relative">
                         <div 
-                           className="h-full bg-destructive transition-all duration-500 ease-out" 
-                           style={{ width: `${opponentTestsPassed ? (opponentTestsPassed / (matchData?.problem?.point_value || 5)) * 100 : 0}%` }} 
+                           className="h-full bg-green-500 transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_10px_rgba(34,197,94,0.5)]" 
+                           style={{ width: `${myHpPct}%` }} 
                         />
                      </div>
                  </div>
-                 <select 
+
+                 <div className="w-full flex flex-col items-end relative">
+                     <span className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Opponent HP</span>
+                     <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5 flex justify-end">
+                        <div 
+                           className="h-full bg-red-500 transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_10px_rgba(239,68,68,0.5)]" 
+                           style={{ width: `${opponentHpPct}%` }} 
+                        />
+                     </div>
+                 </div>
+            </div>
+
+            <div className="flex items-center space-x-6">
+                 <select  
                     value={language} 
                     onChange={(e) => setLanguage(e.target.value)}
                     className="bg-background border border-white/20 rounded px-2 py-1 text-sm outline-none focus:border-primary"

@@ -91,7 +91,7 @@ func (s *MatchService) CreateMatch(ctx context.Context, p1ID, p2ID uuid.UUID) er
 }
 
 // EvaluateWin checks if a player has won
-func (s *MatchService) EvaluateWin(ctx context.Context, matchID, submitterID uuid.UUID, testsPassed, testsTotal int) error {
+func (s *MatchService) EvaluateWin(ctx context.Context, matchID, submitterID uuid.UUID, testsPassed, testsTotal, pointsPassed, pointsTotal int) error {
 	var match models.Match
 	if err := s.db.First(&match, "id = ?", matchID).Error; err != nil {
 		return err
@@ -116,13 +116,20 @@ func (s *MatchService) EvaluateWin(ctx context.Context, matchID, submitterID uui
 			s.FinishMatch(ctx, matchID, &submitterID)
 		}
 	} else {
-		// Broadcast progress
+		// Broadcast HP drop
+		hpDropPct := 0.0
+		if pointsTotal > 0 {
+			hpDropPct = (float64(pointsPassed) / float64(pointsTotal)) * 100.0
+		}
 		s.hub.Broadcast(matchID, WSEvent{
 			Type: "opponent_submitted",
 			Payload: map[string]interface{}{
-				"submitter_id": submitterID,
-				"tests_passed": testsPassed,
-				"tests_total":  testsTotal,
+				"submitter_id":  submitterID,
+				"tests_passed":  testsPassed,
+				"tests_total":   testsTotal,
+				"points_passed": pointsPassed,
+				"points_total":  pointsTotal,
+				"hp_drop_pct":   hpDropPct,
 			},
 		})
 	}

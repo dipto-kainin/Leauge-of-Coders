@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { apiFetch } from '@/service/api';
+import { useAuthStore } from '@/store/authStore';
 
 export interface Match {
   id: string;
@@ -44,7 +45,9 @@ interface MatchState {
   problem: Problem | null;
   timeRemaining: number;
   mySubmissions: Submission[];
-  opponentTestsPassed: number | null;
+  myPointsPassed: number | null;
+  opponentPointsPassed: number | null;
+  totalPoints: number | null;
   socket: WebSocket | null;
   queuePosition: number;
   
@@ -62,7 +65,9 @@ export const useMatchStore = create<MatchState>((set, get) => ({
   problem: null,
   timeRemaining: 1800, // 30 minutes in seconds
   mySubmissions: [],
-  opponentTestsPassed: null,
+  myPointsPassed: null,
+  opponentPointsPassed: null,
+  totalPoints: null,
   socket: null,
   queuePosition: 0,
 
@@ -72,7 +77,9 @@ export const useMatchStore = create<MatchState>((set, get) => ({
     problem: null,
     timeRemaining: 1800,
     mySubmissions: [],
-    opponentTestsPassed: null,
+    myPointsPassed: null,
+    opponentPointsPassed: null,
+    totalPoints: null,
     socket: null,
     queuePosition: 0,
   }),
@@ -148,7 +155,19 @@ export const useMatchStore = create<MatchState>((set, get) => ({
            problem: payload.problem
         });
       } else if (data.type === 'opponent_submitted') {
-        set({ opponentTestsPassed: data.payload.tests_passed });
+        const payload = data.payload;
+        const currentUserId = useAuthStore.getState().user?.id;
+        if (payload.submitter_id === currentUserId) {
+          set({
+            myPointsPassed: payload.points_passed,
+            totalPoints: payload.points_total
+          });
+        } else {
+          set({
+            opponentPointsPassed: payload.points_passed,
+            totalPoints: payload.points_total
+          });
+        }
       } else if (data.type === 'match_result') {
         set((state) => ({ match: { ...state.match, status: 'finished', winner_id: data.payload.winner_id } as Match }));
       }

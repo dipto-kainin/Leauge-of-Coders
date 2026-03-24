@@ -2,6 +2,7 @@ package matchmaking
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/models"
 	"github.com/gin-gonic/gin"
@@ -97,11 +98,11 @@ func (h *QueueHandler) Status(c *gin.Context) {
 		return
 	}
 
-	// Check if user already has an active match (matched but not yet redirected)
+	// Check if user already has an active match (matched but not yet redirected) that is not expired
 	var activeMatch models.Match
 	err := h.db.Where(
-		"(player1_id = ? OR player2_id = ?) AND status = ?",
-		userID, userID, "in_progress",
+		"(player1_id = ? OR player2_id = ?) AND status = ? AND started_at >= ?",
+		userID, userID, "in_progress", time.Now().Add(-30*time.Minute),
 	).Order("created_at DESC").First(&activeMatch).Error
 	if err == nil {
 		// User has been matched — tell the frontend to redirect

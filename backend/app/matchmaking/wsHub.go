@@ -50,9 +50,6 @@ func (h *Hub) Broadcast(matchID uuid.UUID, event WSEvent) {
 
 	for _, conn := range room {
 		if conn != nil {
-			// WriteJSON is not safe for concurrent use on a single connection, 
-            // but we are writing to each connection sequentially here.
-			// Still lock for safety if multiple broadcasts occur simultaneously.
 			conn.WriteJSON(event)
 		}
 	}
