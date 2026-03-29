@@ -91,8 +91,9 @@ export const useMatchStore = create<MatchState>((set, get) => ({
         headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
       });
       set({ queuePosition: data.queuePosition });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to join queue", e);
+      throw e;
     }
   },
 
@@ -119,9 +120,9 @@ export const useMatchStore = create<MatchState>((set, get) => ({
         mySubmissions: [submission, ...state.mySubmissions]
       }));
       return submission;
-    } catch (e) {
+    } catch (e: any) {
       console.error('Submit failed:', e);
-      return null;
+      throw e;
     }
   },
 

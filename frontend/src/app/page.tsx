@@ -1,20 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Code2, Swords, Trophy, Zap } from "lucide-react";
+import { Code2, Swords, Trophy, Zap } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Home() {
+  const { isAuthenticated } = useAuthStore();
   const ranks = [
     { name: "Iron", color: "bg-[#928ea0] text-black" },
     { name: "Bronze", color: "bg-[#a36b4d] text-white" },
@@ -32,53 +25,43 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Navigation Bar */}
-      {/* No lines, background-shifting for the header instead of borders */}
       <Navbar />
 
       <main className="flex-1 flex flex-col items-center">
         {/* Hero Section */}
         <section className="w-full relative overflow-hidden bg-background py-24 lg:py-40 flex flex-col items-center justify-center text-center">
-          {/* Subtle Glow Background Effect */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+          {/* Neon background blobs */}
+          <div className="blob-cyan w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-60" />
+          <div className="blob-pink w-[300px] h-[300px] top-1/4 left-1/4 opacity-40" />
+          <div className="blob-purple w-[250px] h-[250px] bottom-1/4 right-1/4 opacity-30" />
 
           <div className="container max-w-4xl px-4 relative z-10 flex flex-col items-center space-y-8 mt-10">
-            <Badge
-              variant="outline"
-              className="px-4 py-1 text-primary border-primary/20 bg-surface-lowest"
-            >
-              <Zap className="w-4 h-4 mr-2" /> Server Season 1 is Live
-            </Badge>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[rgba(0,245,255,0.2)] bg-[rgba(0,245,255,0.05)] text-[#00f5ff] text-sm font-medium">
+              <Zap className="w-4 h-4" /> Server Season 1 is Live
+            </div>
 
-            <h1 className="text-5xl md:text-7xl font-black tracking-[-0.04em] text-foreground uppercase leading-tight">
-              Code Is A <br className="hidden sm:block" />
-              <span className="text-gradient-primary">
-                High-Intensity Sport
-              </span>
+            <h1 className="font-pixel text-5xl md:text-7xl text-gradient-primary leading-tight">
+              League of Coders
             </h1>
-
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
-              1v1 ranked competitive programming. No slow algorithms. No
-              unoptimized loops. Draft, code, and execute your way to Radiant.
+            <p className="font-pixel text-xl md:text-2xl text-[#a855f7] drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
+              1v1 Competitive Coding Arena
             </p>
 
-            <div className="flex flex-row gap-4 mt-8">
-              <Link href="/queue">
-                <Button
-                  size="lg"
-                  className="h-14 px-10 text-lg font-bold bg-linear-to-br from-primary to-[#8e7fff] text-white hover:scale-105 transition-transform duration-300 hover:shadow-[0_0_25px_rgba(124,106,247,0.4)]"
-                >
-                  Enter Queue <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+              Solve problems. Drain HP. Climb the ladder. Become{" "}
+              <span className="text-gradient-radiant font-bold">Radiant</span>.
+            </p>
+
+            <div className="flex flex-row gap-4 mt-8 flex-wrap justify-center">
+              <Link href={isAuthenticated ? "/queue" : "/auth"}>
+                <button className="pixel-btn pixel-btn-cyan text-base px-8 py-3">
+                  ▶ Find Match
+                </button>
               </Link>
-              <Link href="/profile">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-14 px-8 text-lg font-bold border-border/20 text-muted-foreground hover:bg-surface-highest hover:text-foreground transition-all duration-300"
-                >
-                  View Profile
-                </Button>
+              <Link href={isAuthenticated ? "/profile" : "/auth"}>
+                <button className="pixel-btn pixel-btn-pink text-base px-8 py-3">
+                  👤 My Profile
+                </button>
               </Link>
             </div>
           </div>
@@ -88,67 +71,56 @@ export default function Home() {
         <section className="w-full bg-surface-lowest py-24">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="border-t-[3px] border-t-primary/50 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-linear-gradient(to-b, from-primary/5, to-transparent) opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <CardHeader>
-                  <Swords className="w-10 h-10 text-primary mb-2" />
-                  <CardTitle>1v1 Deathmatch</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
-                    Face off against opponents of similar skill level. Solve the
-                    problem faster and with better optimization to win.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+              {/* Card 1 */}
+              <div className="group relative rounded-bl-2xl rounded-br-2xl p-6 bg-surface-low border border-[rgba(0,245,255,0.1)] hover:border-[rgba(0,245,255,0.3)] hover:shadow-[0_0_25px_rgba(0,245,255,0.08)] transition-all duration-300">
+                <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-[#00f5ff] to-[#a855f7]" />
+                <Swords className="w-10 h-10 text-[#00f5ff] mb-4 drop-shadow-[0_0_8px_rgba(0,245,255,0.6)]" />
+                <h3 className="font-pixel text-xl text-[#00f5ff] mb-3">1v1 Deathmatch</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Face off against opponents of similar skill level. Solve the problem faster and with better optimization to win.
+                </p>
+              </div>
 
-              <Card className="border-t-[3px] border-t-secondary/50 relative overflow-hidden group hover:translate-y-1">
-                <div className="absolute inset-0 bg-linear-gradient(to-b, from-secondary/5, to-transparent) opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <CardHeader>
-                  <Trophy className="w-10 h-10 text-secondary mb-2" />
-                  <CardTitle>True Rank MMR</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
-                    Climb the ladder from Iron to Radiant. Our matching engine
-                    utilizes strict Elo rating for razor-close matches.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+              {/* Card 2 */}
+              <div className="group relative rounded-bl-2xl rounded-br-2xl p-6 bg-surface-low border border-[rgba(255,45,120,0.1)] hover:border-[rgba(255,45,120,0.3)] hover:shadow-[0_0_25px_rgba(255,45,120,0.08)] transition-all duration-300">
+                <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-[#ff2d78] to-[#f0a430]" />
+                <Trophy className="w-10 h-10 text-[#ff2d78] mb-4 drop-shadow-[0_0_8px_rgba(255,45,120,0.6)]" />
+                <h3 className="font-pixel text-xl text-[#ff2d78] mb-3">True Rank MMR</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Climb the ladder from Iron to Radiant. Our matching engine utilizes strict Elo rating for razor-close matches.
+                </p>
+              </div>
 
-              <Card className="border-t-[3px] border-t-platinum/50 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-linear-gradient(to-b, from-platinum/5, to-transparent) opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <CardHeader>
-                  <Code2 className="w-10 h-10 text-platinum mb-2" />
-                  <CardTitle>Editorial Environment</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
-                    A deep hardware aesthetic built for absolute focus. Minimal
-                    distractions, maximum performance.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+              {/* Card 3 */}
+              <div className="group relative rounded-bl-2xl rounded-br-2xl p-6 bg-surface-low border border-[rgba(168,85,247,0.1)] hover:border-[rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.08)] transition-all duration-300">
+                <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-[#a855f7] to-[#4cc9f0]" />
+                <Code2 className="w-10 h-10 text-[#a855f7] mb-4 drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
+                <h3 className="font-pixel text-xl text-[#a855f7] mb-3">Editorial Env</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  A deep hardware aesthetic built for absolute focus. Minimal distractions, maximum performance.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Rank Tier Showcase */}
-        <section className="w-full bg-background py-32 text-center border-y border-white/5 relative z-10 glass-panel">
-          <div className="container mx-auto px-6 max-w-5xl flex flex-col items-center">
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.04em] mb-4 uppercase">
+        <section className="w-full bg-background py-32 text-center border-y border-[rgba(0,245,255,0.06)] relative z-10">
+          <div className="blob-purple w-[400px] h-[400px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20" />
+          <div className="container mx-auto px-6 max-w-5xl flex flex-col items-center relative z-10">
+            <h2 className="font-pixel text-4xl md:text-5xl text-gradient-primary mb-4">
               Prove Your Worth
             </h2>
             <p className="text-muted-foreground mb-16 max-w-xl text-lg">
-              9 distinct ranks. Only the absolute elite can touch the Radiant
-              glow. Where will you finish this season?
+              9 distinct ranks. Only the absolute elite can touch the{" "}
+              <span className="text-gradient-radiant font-bold">Radiant</span> glow.
             </p>
 
             <div className="w-full flex flex-wrap justify-center gap-4">
               {ranks.map((rank) => (
                 <div
                   key={rank.name}
-                  className={`px-6 py-3 rounded-md font-bold text-sm tracking-widest uppercase shadow-lg hover:scale-110 transition-transform duration-300 cursor-default ${rank.color}`}
+                  className={`px-6 py-3 rounded-xl font-bold text-sm tracking-widest uppercase shadow-lg hover:scale-110 transition-transform duration-300 cursor-default ${rank.color}`}
                 >
                   {rank.name}
                 </div>
@@ -158,18 +130,19 @@ export default function Home() {
         </section>
 
         {/* Call To Action */}
-        <section className="w-full bg-surface-lowest pt-32 pb-40 flex justify-center">
-          <div className="container max-w-4xl px-6 text-center">
-            <h2 className="text-4xl md:text-6xl font-black mb-8">
+        <section className="w-full bg-surface-lowest pt-32 pb-40 flex justify-center relative overflow-hidden">
+          <div className="blob-cyan w-[400px] h-[400px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
+          <div className="blob-pink w-[200px] h-[200px] top-1/4 right-1/4 opacity-25" />
+          <div className="container max-w-4xl px-6 text-center relative z-10">
+            <h2 className="font-pixel text-5xl md:text-7xl text-gradient-primary mb-4">
               THE ARENA AWAITS
             </h2>
-            <Link href="/queue">
-              <Button
-                size="lg"
-                className="h-16 px-12 text-xl font-bold bg-linear-to-br from-primary to-[#8e7fff] text-white hover:shadow-[0_0_40px_rgba(124,106,247,0.5)] hover:scale-105 transition-all duration-300"
-              >
-                Start Your First Match <Swords className="ml-3 w-6 h-6" />
-              </Button>
+            <p className="text-muted-foreground text-lg mb-12">No slow algorithms. No mercy.</p>
+            <Link href={isAuthenticated ? "/queue" : "/auth"}>
+              <button className="pixel-btn pixel-btn-cyan text-xl px-12 py-4">
+                <Swords className="inline w-5 h-5 mr-2" />
+                Start Your First Match
+              </button>
             </Link>
           </div>
         </section>

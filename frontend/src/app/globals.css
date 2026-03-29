@@ -9,11 +9,18 @@
     --color-foreground: var(--foreground);
 
     /* Leauge-of-Coders specific tokens */
-    --color-surface-lowest: #0c0e14;
-    --color-surface-low: #191b22;
-    --color-surface-high: #282a30;
-    --color-surface-highest: #33343b;
-    --color-surface-bright: #373940;
+    --color-surface-lowest: #0a0b10;
+    --color-surface-low: #141620;
+    --color-surface-high: #1e2030;
+    --color-surface-highest: #282b3a;
+    --color-surface-bright: #2f3245;
+
+    /* Neon accents */
+    --color-neon-cyan: #00f5ff;
+    --color-neon-pink: #ff2d78;
+    --color-neon-purple: #a855f7;
+    --color-neon-green: #00ff88;
+    --color-neon-yellow: #f0a430;
 
     /* Rank Tiers */
     --color-iron: #928ea0;
@@ -51,39 +58,39 @@
 @layer base {
     :root {
         /* Always dark theme as per DESIGN.md */
-        --background: #0f1117;
+        --background: #0d0e12;
         --foreground: #e8e9f0;
 
         /* Surfaces / Cards */
-        --card: #1e2130;
+        --card: #141620;
         --card-foreground: #e8e9f0;
 
-        --popover: #1a1d27;
+        --popover: #141620;
         --popover-foreground: #e8e9f0;
 
-        /* Accents */
-        --primary: #7c6af7;
-        --primary-foreground: #ffffff;
+        /* Neon Cyan as primary */
+        --primary: #00f5ff;
+        --primary-foreground: #000000;
 
         --secondary: #f0a430;
         --secondary-foreground: #000000;
 
         /* Muted / Ghost */
-        --muted: #191b22;
-        --muted-foreground: #9499b0;
+        --muted: #141620;
+        --muted-foreground: #7a7f99;
 
-        --accent: #242838;
+        --accent: #1e2030;
         --accent-foreground: #e8e9f0;
 
-        --destructive: #e05252;
+        --destructive: #ff2d78;
         --destructive-foreground: #ffffff;
 
         /* Utility */
-        --border: rgba(255, 255, 255, 0.07);
-        --input: rgba(255, 255, 255, 0.07);
-        --ring: rgba(124, 106, 247, 0.2);
+        --border: rgba(0, 245, 255, 0.08);
+        --input: rgba(0, 245, 255, 0.06);
+        --ring: rgba(0, 245, 255, 0.25);
 
-        --radius: 0.5rem;
+        --radius: 0.75rem;
     }
 }
 
@@ -93,10 +100,16 @@
     }
     body {
         @apply bg-background text-foreground antialiased;
+        font-family: var(--font-geist-sans), sans-serif;
+    }
+    h1, h2, h3 {
+        font-family: var(--font-pixel), monospace;
+        letter-spacing: 0.02em;
     }
 }
 
 @layer utilities {
+    /* Surface utilities */
     .bg-surface-lowest {
         background-color: var(--color-surface-lowest);
     }
@@ -113,24 +126,145 @@
         background-color: var(--color-surface-bright);
     }
 
+    /* Neon glow utilities */
     .glow-primary {
-        box-shadow: 0 0 15px rgba(124, 106, 247, 0.2);
+        box-shadow: 0 0 20px rgba(0, 245, 255, 0.3), 0 0 40px rgba(0, 245, 255, 0.1);
+    }
+    .glow-pink {
+        box-shadow: 0 0 20px rgba(255, 45, 120, 0.4), 0 0 40px rgba(255, 45, 120, 0.15);
+    }
+    .glow-green {
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.35), 0 0 40px rgba(0, 255, 136, 0.12);
+    }
+    .glow-purple {
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.15);
     }
 
     .glow-hover:hover {
-        box-shadow: 0 0 20px rgba(124, 106, 247, 0.3);
+        box-shadow: 0 0 25px rgba(0, 245, 255, 0.4), 0 0 50px rgba(0, 245, 255, 0.15);
+    }
+    .glow-hover-pink:hover {
+        box-shadow: 0 0 25px rgba(255, 45, 120, 0.5), 0 0 50px rgba(255, 45, 120, 0.2);
     }
 
+    /* Glassmorphism */
     .glass-panel {
-        background-color: rgba(30, 33, 48, 0.6);
+        background-color: rgba(14, 15, 22, 0.7);
         backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 245, 255, 0.08);
     }
 
+    /* Neon text effects */
+    .neon-text {
+        color: #00f5ff;
+        text-shadow: 0 0 10px rgba(0, 245, 255, 0.8), 0 0 25px rgba(0, 245, 255, 0.4);
+    }
+    .neon-text-pink {
+        color: #ff2d78;
+        text-shadow: 0 0 10px rgba(255, 45, 120, 0.8), 0 0 25px rgba(255, 45, 120, 0.4);
+    }
+    .neon-text-green {
+        color: #00ff88;
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.7), 0 0 20px rgba(0, 255, 136, 0.3);
+    }
+
+    /* Text gradients */
     .text-gradient-primary {
-        @apply bg-clip-text text-transparent bg-gradient-to-r from-[#c7bfff] to-[#8e7fff];
+        @apply bg-clip-text text-transparent;
+        background-image: linear-gradient(135deg, #00f5ff 0%, #a855f7 100%);
+    }
+    .text-gradient-radiant {
+        @apply bg-clip-text text-transparent;
+        background-image: linear-gradient(135deg, #ffffff 0%, #f0a430 100%);
+    }
+    .text-gradient-pink {
+        @apply bg-clip-text text-transparent;
+        background-image: linear-gradient(135deg, #ff2d78 0%, #a855f7 100%);
     }
 
-    .text-gradient-radiant {
-        @apply bg-clip-text text-transparent bg-gradient-to-br from-white to-[#f0a430];
+    /* Pixel-style button */
+    .pixel-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-pixel), monospace;
+        font-size: 0.9rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.6rem 1.5rem;
+        border-radius: 0.5rem;
+        border: 2px solid currentColor;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-weight: 700;
+    }
+    .pixel-btn-cyan {
+        color: #00f5ff;
+        background-color: rgba(0, 245, 255, 0.08);
+        box-shadow: 0 0 12px rgba(0, 245, 255, 0.25), inset 0 0 12px rgba(0, 245, 255, 0.05);
+    }
+    .pixel-btn-cyan:hover {
+        background-color: rgba(0, 245, 255, 0.15);
+        box-shadow: 0 0 25px rgba(0, 245, 255, 0.5), 0 0 50px rgba(0, 245, 255, 0.2), inset 0 0 15px rgba(0, 245, 255, 0.1);
+    }
+    .pixel-btn-pink {
+        color: #ff2d78;
+        background-color: rgba(255, 45, 120, 0.08);
+        box-shadow: 0 0 12px rgba(255, 45, 120, 0.25), inset 0 0 12px rgba(255, 45, 120, 0.05);
+    }
+    .pixel-btn-pink:hover {
+        background-color: rgba(255, 45, 120, 0.15);
+        box-shadow: 0 0 25px rgba(255, 45, 120, 0.5), 0 0 50px rgba(255, 45, 120, 0.2), inset 0 0 15px rgba(255, 45, 120, 0.1);
+    }
+    .pixel-btn-purple {
+        color: #a855f7;
+        background-color: rgba(168, 85, 247, 0.08);
+        box-shadow: 0 0 12px rgba(168, 85, 247, 0.25), inset 0 0 12px rgba(168, 85, 247, 0.05);
+    }
+    .pixel-btn-purple:hover {
+        background-color: rgba(168, 85, 247, 0.15);
+        box-shadow: 0 0 25px rgba(168, 85, 247, 0.5), 0 0 50px rgba(168, 85, 247, 0.2), inset 0 0 15px rgba(168, 85, 247, 0.1);
+    }
+
+    /* Neon card border */
+    .neon-card {
+        border: 1px solid rgba(0, 245, 255, 0.1);
+        border-radius: 1rem;
+        background-color: var(--color-surface-low);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .neon-card:hover {
+        border-color: rgba(0, 245, 255, 0.25);
+        box-shadow: 0 0 20px rgba(0, 245, 255, 0.08);
+    }
+
+    /* Background blobs */
+    .blob-cyan {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 245, 255, 0.12) 0%, transparent 70%);
+        filter: blur(60px);
+        pointer-events: none;
+    }
+    .blob-pink {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 45, 120, 0.1) 0%, transparent 70%);
+        filter: blur(60px);
+        pointer-events: none;
+    }
+    .blob-purple {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+        filter: blur(60px);
+        pointer-events: none;
+    }
+
+    /* Font pixel helper */
+    .font-pixel {
+        font-family: var(--font-pixel), monospace;
+        letter-spacing: 0.04em;
     }
 }

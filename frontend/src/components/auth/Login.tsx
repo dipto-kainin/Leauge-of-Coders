@@ -42,9 +42,9 @@ export default function Login({ onSwitch }: LoginProps) {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8 glass-panel p-10 rounded-2xl shadow-2xl relative">
+    <div className="w-full max-w-md space-y-8 glass-panel p-10 rounded-2xl shadow-[0_0_40px_rgba(0,245,255,0.08)] relative border border-[rgba(0,245,255,0.12)]">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-foreground">Sign In</h2>
+        <h2 className="font-pixel text-4xl neon-text">Sign In</h2>
         <p className="text-sm text-muted-foreground mt-2">
           Connect your account to enter the queue
         </p>
@@ -59,7 +59,7 @@ export default function Login({ onSwitch }: LoginProps) {
             type="email"
             value={form.email}
             onChange={onChange("email")}
-            className="w-full bg-surface-lowest border-b-2 border-transparent focus:border-primary text-foreground px-4 py-3 rounded-t-md outline-none transition-all focus:bg-surface-high/50"
+            className="w-full bg-surface-lowest border-b-2 border-transparent focus:border-[#00f5ff] text-foreground px-4 py-3 rounded-t-md outline-none transition-all focus:bg-surface-high/50 focus:shadow-[0_1px_0_0_rgba(0,245,255,0.5)]"
             placeholder="developer@example.com"
             required
             autoComplete="email"
@@ -75,7 +75,7 @@ export default function Login({ onSwitch }: LoginProps) {
             type="password"
             value={form.password}
             onChange={onChange("password")}
-            className="w-full bg-surface-lowest border-b-2 border-transparent focus:border-primary text-foreground px-4 py-3 rounded-t-md outline-none transition-all focus:bg-surface-high/50"
+            className="w-full bg-surface-lowest border-b-2 border-transparent focus:border-[#00f5ff] text-foreground px-4 py-3 rounded-t-md outline-none transition-all focus:bg-surface-high/50 focus:shadow-[0_1px_0_0_rgba(0,245,255,0.5)]"
             placeholder="••••••••"
             required
             autoComplete="current-password"
@@ -87,13 +87,13 @@ export default function Login({ onSwitch }: LoginProps) {
           <p className="text-sm text-red-400 font-medium">{errorMessage}</p>
         ) : null}
 
-        <Button
+        <button
           type="submit"
           disabled={isLoading}
-          className="w-full h-12 text-lg font-bold bg-primary text-primary-foreground hover:glow-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="pixel-btn pixel-btn-cyan w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? "Logging in..." : "Login to Arena"}
-        </Button>
+          {isLoading ? "Logging in..." : "▶ Login to Arena"}
+        </button>
       </form>
 
       <div className="mt-8 relative">
@@ -142,7 +142,7 @@ export default function Login({ onSwitch }: LoginProps) {
         <button
           type="button"
           onClick={onSwitch}
-          className="font-bold underline hover:text-foreground transition-colors"
+          className="font-bold text-[#00f5ff] hover:drop-shadow-[0_0_6px_rgba(0,245,255,0.7)] transition-all"
           disabled={isLoading}
         >
           Register
@@ -150,7 +150,7 @@ export default function Login({ onSwitch }: LoginProps) {
       </div>
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-primary transition-colors">
+        <Link href="/" className="hover:text-[#00f5ff] hover:drop-shadow-[0_0_6px_rgba(0,245,255,0.6)] transition-all">
           Return to Landing Page
         </Link>
       </div>

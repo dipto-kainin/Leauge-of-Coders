@@ -55,19 +55,22 @@ export default function AuthPage() {
       <div className="relative h-screen w-full overflow-hidden">
         {/* Branding Panel */}
         <div
-          className={`absolute top-0 h-full z-20 bg-surface-lowest border-white/5 flex flex-col justify-center items-center p-12 transition-all duration-700 ease-in-out ${brandingClass} ${
+          className={`absolute top-0 h-full z-20 bg-surface-lowest flex flex-col justify-center items-center p-12 transition-all duration-700 ease-in-out ${brandingClass} ${
             mode === "login" || mode === "covering-to-register"
-              ? "border-r"
-              : "border-l"
+              ? "border-r border-[rgba(0,245,255,0.08)]"
+              : "border-l border-[rgba(0,245,255,0.08)]"
           }`}
         >
           <div className="absolute inset-0 bg-[url('/screen.png')] bg-cover bg-center opacity-10 mix-blend-overlay" />
           <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-transparent" />
+          {/* Neon blobs */}
+          <div className="blob-cyan w-[300px] h-[300px] top-1/4 left-1/4 opacity-25" />
+          <div className="blob-pink w-[200px] h-[200px] bottom-1/4 right-1/4 opacity-20" />
 
           <div className="z-10 flex flex-col items-center space-y-6 text-center">
-            <Swords className="w-20 h-20 text-primary drop-shadow-[0_0_15px_rgba(124,106,247,0.5)]" />
-            <h1 className="text-5xl font-black uppercase tracking-[-0.04em]">
-              Leauge-of-Coders
+            <Swords className="w-20 h-20 text-[#00f5ff] drop-shadow-[0_0_20px_rgba(0,245,255,0.8)]" />
+            <h1 className="font-pixel text-5xl neon-text">
+              League-of-Coders
             </h1>
             <p className="text-xl text-muted-foreground max-w-sm">
               Prove your coding mastery in the ultimate 1v1 battleground.
