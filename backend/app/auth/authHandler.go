@@ -48,11 +48,14 @@ type MeResponse struct {
 }
 
 type UserDTO struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	Role     string    `json:"role"`
-	Method   string    `json:"method"`
+	ID            uuid.UUID `json:"id"`
+	Username      string    `json:"username"`
+	Email         string    `json:"email"`
+	Role          string    `json:"role"`
+	Method        string    `json:"method"`
+	MMR           int       `json:"mmr"`
+	WinRate       float64   `json:"win_rate"`
+	MatchesPlayed int       `json:"matches_played"`
 }
 
 type errorResponse struct {

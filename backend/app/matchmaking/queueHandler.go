@@ -36,18 +36,14 @@ func (h *QueueHandler) Join(c *gin.Context) {
 		return
 	}
 
-    // Get user MMR. Typically you would fetch the user from DB to get current MMR.
-    // Assuming we have access to context or we injected user repo in the handler, 
-    // but for now, we'll try to get it from Gin context if middleware sets it, or default to 1000.
-    // In a real app, you should query the DB for the user's latest MMR.
-    userInteface, exists := c.Get("user")
-    var mmr int = 1000
-    if exists {
-        user, ok := userInteface.(*models.User)
-        if ok {
-            mmr = user.MMR
-        }
-    }
+	userInteface, exists := c.Get("user")
+	var mmr int = 1000
+	if exists {
+		user, ok := userInteface.(*models.User)
+		if ok {
+			mmr = user.MMR
+		}
+	}
 
 	if err := h.queueService.JoinQueue(c.Request.Context(), userID, mmr); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -57,7 +53,7 @@ func (h *QueueHandler) Join(c *gin.Context) {
 	position, _ := h.queueService.GetQueuePosition(c.Request.Context(), userID)
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": "queued",
+		"status":        "queued",
 		"queuePosition": position,
 	})
 }
@@ -97,15 +93,12 @@ func (h *QueueHandler) Status(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 		return
 	}
-
-	// Check if user already has an active match (matched but not yet redirected) that is not expired
 	var activeMatch models.Match
 	err := h.db.Where(
 		"(player1_id = ? OR player2_id = ?) AND status = ? AND started_at >= ?",
 		userID, userID, "in_progress", time.Now().Add(-30*time.Minute),
 	).Order("created_at DESC").First(&activeMatch).Error
 	if err == nil {
-		// User has been matched — tell the frontend to redirect
 		c.JSON(http.StatusOK, gin.H{
 			"status":   "matched",
 			"match_id": activeMatch.ID,

@@ -4,6 +4,9 @@ export type User = {
   email: string;
   role: "user" | "admin";
   method: "local" | "google";
+  mmr: number;
+  win_rate: number;
+  matches_played: number;
 };
 
 export type RegisterPayload = {

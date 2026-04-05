@@ -4,9 +4,16 @@ import Link from "next/link";
 import { ArrowLeft, User } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import AuthGuard from "@/components/auth/AuthGuard";
+import Image from "next/image";
+import { getRankFromMmr, toWinRatePercentage } from "@/lib/rank";
 
 export default function ProfilePage() {
   const { user } = useAuthStore();
+  const mmr = user?.mmr ?? 1000;
+  const matchesPlayed = user?.matches_played ?? 0;
+  const winRate = toWinRatePercentage(user?.win_rate ?? 0);
+  const rank = getRankFromMmr(mmr, matchesPlayed);
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background p-8 md:p-16 relative overflow-hidden">
@@ -28,16 +35,33 @@ export default function ProfilePage() {
               <User className="w-16 h-16 text-[#00f5ff]" />
             </div>
             <div className="flex-1 space-y-2 text-center md:text-left">
-              <h1 className="font-pixel text-4xl neon-text">{user?.username}</h1>
+              <h1 className="font-pixel text-4xl neon-text">{user?.username ?? "Player"}</h1>
               <p className="text-muted-foreground">
-                Joined Season 1 • 240 Matches Played
+                Joined Season 1 • {matchesPlayed} Matches Played
               </p>
             </div>
             <div className="bg-surface-high px-8 py-4 rounded-2xl border border-[#4361ee]/40 shadow-[0_0_20px_rgba(67,97,238,0.3)] text-center">
+              <div className="mb-3 flex justify-center">
+                {rank.iconPath ? (
+                  <Image
+                    src={rank.iconPath}
+                    alt={rank.label}
+                    width={84}
+                    height={84}
+                    className="drop-shadow-[0_0_10px_rgba(67,97,238,0.4)]"
+                    priority
+                  />
+                ) : (
+                  <div className="w-[84px] h-[84px] rounded-full border border-[rgba(255,255,255,0.2)] bg-surface-highest flex items-center justify-center">
+                    <span className="font-pixel text-4xl text-muted-foreground">?</span>
+                  </div>
+                )}
+              </div>
               <p className="text-xs uppercase font-bold tracking-widest text-muted-foreground mb-1">
                 Current Rank
               </p>
-              <p className="font-pixel text-3xl text-[#4361ee] drop-shadow-[0_0_10px_rgba(67,97,238,0.7)]">Diamond III</p>
+              <p className={`font-pixel text-3xl ${rank.colorClass}`}>{rank.label}</p>
+              <p className="text-sm text-muted-foreground mt-1">{mmr} MMR</p>
             </div>
           </div>
 
@@ -50,74 +74,48 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-pixel text-4xl neon-text">58.4%</p>
+                <p className="font-pixel text-4xl neon-text">{winRate.toFixed(1)}%</p>
               </CardContent>
             </Card>
             <Card className="rounded-2xl bg-surface-low border border-[rgba(240,164,48,0.15)] hover:border-[rgba(240,164,48,0.35)] transition-all duration-300">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">
-                  Peak Rating
+                  Current MMR
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-pixel text-4xl text-[#f0a430] drop-shadow-[0_0_8px_rgba(240,164,48,0.6)]">2140 MMR</p>
+                <p className="font-pixel text-4xl text-[#f0a430] drop-shadow-[0_0_8px_rgba(240,164,48,0.6)]">
+                  {mmr} MMR
+                </p>
               </CardContent>
             </Card>
             <Card className="rounded-2xl bg-surface-low border border-[rgba(0,255,136,0.12)] hover:border-[rgba(0,255,136,0.3)] transition-all duration-300">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">
-                  Win Streak
+                  Rank Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-pixel text-4xl neon-text-green">8 W</p>
+                <p className="font-pixel text-2xl neon-text-green">
+                  {rank.isUnranked ? "Placement (?)" : "Ranked"}
+                </p>
+                {rank.isUnranked && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Complete 10 matches to reveal your rank.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Match History Table Skeleton */}
+          {/* Match History Placeholder */}
           <Card className="mt-8 rounded-2xl bg-surface-low border border-[rgba(0,245,255,0.08)]">
             <CardHeader>
               <CardTitle className="font-pixel text-2xl neon-text">Recent Matches</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-4 bg-surface-lowest rounded-xl border border-[rgba(255,255,255,0.04)] hover:border-[rgba(0,245,255,0.15)] hover:bg-surface-high transition-all duration-200 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-1.5 h-12 rounded-full ${
-                          i % 2 === 0
-                            ? "bg-[#ff2d78] shadow-[0_0_8px_rgba(255,45,120,0.6)]"
-                            : "bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.6)]"
-                        }`}
-                      />
-                      <div>
-                        <p className={`font-bold ${i % 2 === 0 ? "text-[#ff2d78]" : "text-[#00ff88]"}`}>
-                          {i % 2 === 0 ? "Defeat" : "Victory"}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Two Sum Optimizations
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p
-                        className={`font-bold font-pixel ${
-                          i % 2 === 0 ? "text-[#ff2d78]" : "text-[#00ff88]"
-                        }`}
-                      >
-                        {i % 2 === 0 ? "-14" : "+22"} RR
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        vs Chovy_XYZ
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <div className="rounded-xl border border-[rgba(255,255,255,0.05)] bg-surface-lowest p-6 text-center text-muted-foreground">
+                Match history integration is pending backend match list API.
               </div>
             </CardContent>
           </Card>

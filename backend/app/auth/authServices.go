@@ -49,11 +49,14 @@ type TokenResponse struct {
 }
 
 type MeUser struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	Role     string    `json:"role"`
-	Method   string    `json:"method"`
+	ID            uuid.UUID `json:"id"`
+	Username      string    `json:"username"`
+	Email         string    `json:"email"`
+	Role          string    `json:"role"`
+	Method        string    `json:"method"`
+	MMR           int       `json:"mmr"`
+	WinRate       float64   `json:"win_rate"`
+	MatchesPlayed int       `json:"matches_played"`
 }
 
 type AuthClaims struct {
@@ -135,11 +138,14 @@ func (s *Service) Me(userID uuid.UUID) (*MeResponse, error) {
 
 	return &MeResponse{
 		User: UserDTO{
-			ID:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-			Role:     user.Role,
-			Method:   user.Method,
+			ID:            user.ID,
+			Username:      user.Username,
+			Email:         user.Email,
+			Role:          user.Role,
+			Method:        user.Method,
+			MMR:           user.MMR,
+			WinRate:       user.WinRate,
+			MatchesPlayed: user.MatchesPlayed,
 		},
 	}, nil
 }
@@ -236,11 +242,14 @@ func (s *Service) issueToken(user *models.User) (*AuthResponse, error) {
 	return &AuthResponse{
 		Token: signed,
 		User: UserDTO{
-			ID:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-			Role:     user.Role,
-			Method:   user.Method,
+			ID:            user.ID,
+			Username:      user.Username,
+			Email:         user.Email,
+			Role:          user.Role,
+			Method:        user.Method,
+			MMR:           user.MMR,
+			WinRate:       user.WinRate,
+			MatchesPlayed: user.MatchesPlayed,
 		},
 	}, nil
 }

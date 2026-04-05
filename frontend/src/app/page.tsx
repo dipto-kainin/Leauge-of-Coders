@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Code2, Swords, Trophy, Zap } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,18 +10,15 @@ import { useAuthStore } from "@/store/authStore";
 export default function Home() {
   const { isAuthenticated } = useAuthStore();
   const ranks = [
-    { name: "Iron", color: "bg-[#928ea0] text-black" },
-    { name: "Bronze", color: "bg-[#a36b4d] text-white" },
-    { name: "Silver", color: "bg-[#cbd5e1] text-black" },
-    { name: "Gold", color: "bg-[#f0a430] text-black" },
-    { name: "Platinum", color: "bg-[#4cc9f0] text-black" },
-    { name: "Diamond", color: "bg-[#4361ee] text-white" },
-    { name: "Ascendant", color: "bg-[#06d6a0] text-black" },
-    { name: "Immortal", color: "bg-[#ef476f] text-white" },
-    {
-      name: "Radiant",
-      color: "bg-gradient-to-br from-white to-[#f0a430] text-black",
-    },
+    { name: "Iron", icon: "/rank_png/Iron_3_Rank.png", color: "bg-[#928ea0] text-black" },
+    { name: "Bronze", icon: "/rank_png/Bronze_3_Rank.png", color: "bg-[#a36b4d] text-white" },
+    { name: "Silver", icon: "/rank_png/Silver_3_Rank.png", color: "bg-[#cbd5e1] text-black" },
+    { name: "Gold", icon: "/rank_png/Gold_3_Rank.png", color: "bg-[#f0a430] text-black" },
+    { name: "Platinum", icon: "/rank_png/Platinum_3_Rank.png", color: "bg-[#4cc9f0] text-black" },
+    { name: "Diamond", icon: "/rank_png/Diamond_3_Rank.png", color: "bg-[#4361ee] text-white" },
+    { name: "Ascendant", icon: "/rank_png/Ascendant_3_Rank.png", color: "bg-[#06d6a0] text-black" },
+    { name: "Immortal", icon: "/rank_png/Immortal_3_Rank.png", color: "bg-[#ef476f] text-white" },
+    { name: "Radiant", icon: "/rank_png/Radiant_Rank.png", color: "bg-gradient-to-br from-white to-[#f0a430] text-black" },
   ];
 
   return (
@@ -116,13 +114,22 @@ export default function Home() {
               <span className="text-gradient-radiant font-bold">Radiant</span> glow.
             </p>
 
-            <div className="w-full flex flex-wrap justify-center gap-4">
+            <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 place-items-center">
               {ranks.map((rank) => (
                 <div
                   key={rank.name}
-                  className={`px-6 py-3 rounded-xl font-bold text-sm tracking-widest uppercase shadow-lg hover:scale-110 transition-transform duration-300 cursor-default ${rank.color}`}
+                  className={`flex flex-col items-center gap-3 px-4 py-4 rounded-xl shadow-lg transition-transform duration-300 hover:scale-110 ${rank.color}`}
                 >
-                  {rank.name}
+                  <Image
+                    src={rank.icon}
+                    alt={`${rank.name} rank icon`}
+                    width={84}
+                    height={84}
+                    className="drop-shadow-[0_0_12px_rgba(0,0,0,0.25)]"
+                  />
+                  <span className="font-bold text-sm tracking-widest uppercase">
+                    {rank.name}
+                  </span>
                 </div>
               ))}
             </div>
