@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/auth"
+	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/matchmaking"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/middleware"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/models"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/problems"
-	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/matchmaking"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/app/routes"
 	"github.com/dipto-kainin/Leauge-of-Coders/backend/config"
 	"github.com/gin-gonic/gin"
@@ -43,31 +43,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
-
-	fmt.Print("Do you want to auto-migrate models? (y/n): ")
-	if !scanner.Scan() {
-		log.Fatal("failed to read input")
-	}
-
-	choice := strings.TrimSpace(strings.ToLower(scanner.Text()))
-
-	if choice == "y" || choice == "yes" {
+	if shouldRunMigrations() {
 		fmt.Println("Auto-migrating models...")
 
 		if err := db.AutoMigrate(
-            &models.User{}, 
-            &models.Problem{}, 
-            &models.TestCase{},
-            &models.Match{},
-            &models.Submission{},
-        ); err != nil {
+			&models.User{},
+			&models.Problem{},
+			&models.TestCase{},
+			&models.Match{},
+			&models.Submission{},
+		); err != nil {
 			log.Fatal(err)
 		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+	} else {
+		fmt.Println("Skipping auto-migrations")
 	}
 
 	// Build auth dependencies
@@ -124,6 +113,31 @@ func main() {
 	if err := app.Run(":" + port); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func shouldRunMigrations() bool {
+	if value := strings.TrimSpace(strings.ToLower(os.Getenv("AUTO_MIGRATE"))); value != "" {
+		return value == "1" || value == "true" || value == "yes" || value == "y"
+	}
+
+	stat, err := os.Stdin.Stat()
+	if err != nil || (stat.Mode()&os.ModeCharDevice) == 0 {
+		return false
+	}
+
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Print("Do you want to auto-migrate models? (y/n): ")
+	if !scanner.Scan() {
+		return false
+	}
+
+	choice := strings.TrimSpace(strings.ToLower(scanner.Text()))
+	if err := scanner.Err(); err != nil {
+		log.Printf("failed reading migration choice: %v", err)
+		return false
+	}
+
+	return choice == "y" || choice == "yes"
 }
 
 // compile-time check to ensure UUID type is linked where expected

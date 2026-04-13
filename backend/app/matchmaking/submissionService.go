@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -81,11 +82,19 @@ func runJudge0Code(ctx context.Context, code, language, stdin string) (string, e
 		return "", fmt.Errorf("failed to marshal judge0 request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", "http://localhost:2358/submissions?base64_encoded=false&wait=true", bytes.NewBuffer(jsonData))
+	judge0URL := strings.TrimRight(os.Getenv("JUDGE0_URL"), "/")
+	if judge0URL == "" {
+		judge0URL = "http://localhost:2358"
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", judge0URL+"/submissions?base64_encoded=false&wait=true", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", fmt.Errorf("failed to create judge0 request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if token := strings.TrimSpace(os.Getenv("JUDGE0_AUTH_TOKEN")); token != "" {
+		req.Header.Set("X-Auth-Token", token)
+	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -163,7 +172,7 @@ func (s *SubmissionService) Submit(ctx context.Context, matchID, userID uuid.UUI
 
 		// Run each test with a 5 second timeout (includes Judge0 networking overhead)
 		timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		
+
 		// Unescape literal newlines in DB input
 		actualInput := strings.ReplaceAll(tc.Input, `\n`, "\n")
 		actualInput = strings.ReplaceAll(actualInput, `\t`, "\t")
@@ -179,7 +188,7 @@ func (s *SubmissionService) Submit(ctx context.Context, matchID, userID uuid.UUI
 		// Trim whitespace before comparing
 		expected := strings.TrimSpace(strings.ReplaceAll(tc.Output, `\n`, "\n"))
 		actual := strings.TrimSpace(stdout)
-		
+
 		fmt.Printf("[Local-Judge] Got: %q | Expected: %q | Match: %v\n", actual, expected, actual == expected)
 		if actual == expected {
 			passed++

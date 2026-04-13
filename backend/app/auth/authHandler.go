@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -165,5 +166,11 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	}
 
 	c.SetCookie("token", resp.Token, 3600*24, "/", "", false, true)
-	c.Redirect(http.StatusFound, "http://localhost:3000/")
+
+	appURL := os.Getenv("APP_URL")
+	if appURL == "" {
+		appURL = "http://localhost:3000"
+	}
+
+	c.Redirect(http.StatusFound, appURL+"/")
 }

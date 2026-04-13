@@ -1,0 +1,37 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      AUTO_MIGRATE: ${AUTO_MIGRATE:-true}
+      REDIS_ADDR: redis:6379
+      JUDGE0_URL: ${JUDGE0_URL:-http://host.docker.internal:2358}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2.4
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
